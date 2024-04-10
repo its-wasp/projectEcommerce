@@ -1,6 +1,7 @@
 package com.example.projectEcommerce.services;
 
 import com.example.projectEcommerce.dtos.FakeStoreProductDto;
+import com.example.projectEcommerce.exceptions.ProductNotFoundException;
 import com.example.projectEcommerce.models.Category;
 import com.example.projectEcommerce.models.Product;
 import org.springframework.stereotype.Service;
@@ -15,10 +16,9 @@ public class FakeStoreProductService implements ProductService{
         RestTemplate restTemplate = new RestTemplate();
         FakeStoreProductDto fakeStoreProductdto = restTemplate.getForObject("https://fakestoreapi.com/products/"+id,
                 FakeStoreProductDto.class);
-
-        // convert FakeStoreProductDto object to Product object.
-
-        assert fakeStoreProductdto != null;
+        if(fakeStoreProductdto == null){
+            throw new ProductNotFoundException(id, "invalid id provided");
+        }
         return convertFakeStoreProductDtoToProduct(fakeStoreProductdto);
     }
 
@@ -28,7 +28,9 @@ public class FakeStoreProductService implements ProductService{
         List<FakeStoreProductDto> fakeStoreProductDtos = restTemplate.getForObject("https://fakestoreapi.com/products",
                 List.class);
         List<Product> products = new ArrayList<>();
-        assert fakeStoreProductDtos != null;
+        if(fakeStoreProductDtos == null){
+            throw new ProductNotFoundException(0L, "No products found");
+        }
         for(FakeStoreProductDto fakeStoreProductDto: fakeStoreProductDtos){
             products.add(convertFakeStoreProductDtoToProduct(fakeStoreProductDto));
         }
